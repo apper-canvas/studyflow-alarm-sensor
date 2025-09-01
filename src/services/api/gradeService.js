@@ -1,57 +1,203 @@
-import gradesData from "@/services/mockData/grades.json";
+const tableName = 'grade_c';
 
-let grades = [...gradesData];
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Initialize ApperClient
+const getApperClient = () => {
+  const { ApperClient } = window.ApperSDK;
+  return new ApperClient({
+    apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+    apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+  });
+};
 
 export const gradeService = {
   async getAll() {
-    await delay(300);
-    return [...grades];
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_c"}},
+          {"field": {"Name": "weight_c"}},
+          {"field": {"Name": "score_c"}},
+          {"field": {"Name": "total_c"}},
+          {"field": {"name": "course_id_c"}, "referenceField": {"field": {"Name": "Name"}}}
+        ],
+        orderBy: [{"fieldName": "course_id_c", "sorttype": "ASC"}]
+      };
+      
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      return response.data.map(grade => ({
+        Id: grade.Id,
+        category: grade.category_c,
+        weight: grade.weight_c,
+        score: grade.score_c,
+        total: grade.total_c,
+        courseId: grade.course_id_c?.Id || grade.course_id_c
+      }));
+    } catch (error) {
+      console.error("Error fetching grades:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getById(id) {
-    await delay(200);
-    const grade = grades.find(grade => grade.Id === parseInt(id));
-    if (!grade) {
-      throw new Error("Grade not found");
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_c"}},
+          {"field": {"Name": "weight_c"}},
+          {"field": {"Name": "score_c"}},
+          {"field": {"Name": "total_c"}},
+          {"field": {"name": "course_id_c"}, "referenceField": {"field": {"Name": "Name"}}}
+        ]
+      };
+      
+      const response = await apperClient.getRecordById(tableName, id, params);
+      
+      if (!response?.data) {
+        throw new Error("Grade not found");
+      }
+      
+      const grade = response.data;
+      return {
+        Id: grade.Id,
+        category: grade.category_c,
+        weight: grade.weight_c,
+        score: grade.score_c,
+        total: grade.total_c,
+        courseId: grade.course_id_c?.Id || grade.course_id_c
+      };
+    } catch (error) {
+      console.error(`Error fetching grade ${id}:`, error?.response?.data?.message || error);
+      throw error;
     }
-    return { ...grade };
   },
 
   async create(gradeData) {
-    await delay(400);
-    const maxId = grades.length > 0 ? Math.max(...grades.map(g => g.Id)) : 0;
-    const newGrade = {
-      Id: maxId + 1,
-      ...gradeData,
-      courseId: parseInt(gradeData.courseId)
-    };
-    grades.push(newGrade);
-    return { ...newGrade };
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        records: [{
+          Name: `${gradeData.category} - Course ${gradeData.courseId}`,
+          category_c: gradeData.category,
+          weight_c: parseFloat(gradeData.weight),
+          score_c: parseFloat(gradeData.score),
+          total_c: parseFloat(gradeData.total),
+          course_id_c: parseInt(gradeData.courseId)
+        }]
+      };
+      
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failed = response.results.filter(r => !r.success);
+        if (failed.length > 0) {
+          console.error(`Failed to create grade:`, failed);
+          throw new Error(failed[0].message || "Failed to create grade");
+        }
+        
+        const created = response.results[0].data;
+        return {
+          Id: created.Id,
+          category: created.category_c,
+          weight: created.weight_c,
+          score: created.score_c,
+          total: created.total_c,
+          courseId: created.course_id_c
+        };
+      }
+    } catch (error) {
+      console.error("Error creating grade:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async update(id, gradeData) {
-    await delay(300);
-    const index = grades.findIndex(grade => grade.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Grade not found");
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: `${gradeData.category} - Course ${gradeData.courseId}`,
+          category_c: gradeData.category,
+          weight_c: parseFloat(gradeData.weight),
+          score_c: parseFloat(gradeData.score),
+          total_c: parseFloat(gradeData.total),
+          course_id_c: parseInt(gradeData.courseId)
+        }]
+      };
+      
+      const response = await apperClient.updateRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failed = response.results.filter(r => !r.success);
+        if (failed.length > 0) {
+          console.error(`Failed to update grade:`, failed);
+          throw new Error(failed[0].message || "Failed to update grade");
+        }
+        
+        const updated = response.results[0].data;
+        return {
+          Id: updated.Id,
+          category: updated.category_c,
+          weight: updated.weight_c,
+          score: updated.score_c,
+          total: updated.total_c,
+          courseId: updated.course_id_c
+        };
+      }
+    } catch (error) {
+      console.error("Error updating grade:", error?.response?.data?.message || error);
+      throw error;
     }
-    const updatedData = { ...gradeData };
-    if (updatedData.courseId) {
-      updatedData.courseId = parseInt(updatedData.courseId);
-    }
-    grades[index] = { ...grades[index], ...updatedData };
-    return { ...grades[index] };
   },
 
   async delete(id) {
-    await delay(200);
-    const index = grades.findIndex(grade => grade.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Grade not found");
+    try {
+      const apperClient = getApperClient();
+      const params = { 
+        RecordIds: [parseInt(id)]
+      };
+      
+      const response = await apperClient.deleteRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const failed = response.results.filter(r => !r.success);
+        if (failed.length > 0) {
+          console.error(`Failed to delete grade:`, failed);
+          throw new Error(failed[0].message || "Failed to delete grade");
+        }
+      }
+      
+      return { Id: parseInt(id) };
+    } catch (error) {
+      console.error("Error deleting grade:", error?.response?.data?.message || error);
+      throw error;
     }
-    const deletedGrade = grades.splice(index, 1)[0];
-    return { ...deletedGrade };
   }
 };
