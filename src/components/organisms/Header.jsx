@@ -41,14 +41,15 @@ const Header = ({ onMenuToggle, title = "Dashboard" }) => {
                         {notifications.length}
                     </span>}
                 </Button>
-                <Button variant="ghost" size="sm" className="p-2">
-                    <Button variant="ghost" size="sm" className="p-2">
-                        <ApperIcon name="Settings" className="w-5 h-5" />
-                    </Button>
-                    {user && <Button variant="ghost" size="sm" onClick={logout} className="p-2">
+<Button variant="ghost" size="sm" className="p-2">
+                    <ApperIcon name="Settings" className="w-5 h-5" />
+                </Button>
+                {user && (
+                    <Button variant="ghost" size="sm" onClick={logout} className="p-2" title="Logout">
                         <ApperIcon name="LogOut" className="w-5 h-5" />
-                    </Button>}
-                </Button></div>
+                    </Button>
+                )}
+            </div>
         </div>
     </div></header>
   );
