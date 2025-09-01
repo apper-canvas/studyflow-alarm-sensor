@@ -1,0 +1,52 @@
+[
+  {
+    "Id": 1,
+    "name": "Calculus I",
+    "code": "MATH 151",
+    "professor": "Dr. Sarah Johnson",
+    "schedule": "MWF 10:00-10:50 AM",
+    "color": "blue",
+    "credits": 4,
+    "semester": "Fall 2024"
+  },
+  {
+    "Id": 2,
+    "name": "Introduction to Psychology",
+    "code": "PSYC 101",
+    "professor": "Prof. Michael Chen",
+    "schedule": "TTh 2:00-3:15 PM",
+    "color": "green",
+    "credits": 3,
+    "semester": "Fall 2024"
+  },
+  {
+    "Id": 3,
+    "name": "Computer Science Fundamentals",
+    "code": "CS 101",
+    "professor": "Dr. Emily Rodriguez",
+    "schedule": "MWF 1:00-1:50 PM",
+    "color": "purple",
+    "credits": 4,
+    "semester": "Fall 2024"
+  },
+  {
+    "Id": 4,
+    "name": "English Composition",
+    "code": "ENGL 101",
+    "professor": "Prof. David Thompson",
+    "schedule": "TTh 11:00-12:15 PM",
+    "color": "red",
+    "credits": 3,
+    "semester": "Fall 2024"
+  },
+  {
+    "Id": 5,
+    "name": "Biology I",
+    "code": "BIOL 151",
+    "professor": "Dr. Lisa Park",
+    "schedule": "MWF 9:00-9:50 AM",
+    "color": "yellow",
+    "credits": 4,
+    "semester": "Fall 2024"
+  }
+]
